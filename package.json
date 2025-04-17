@@ -8,13 +8,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.0.1",
     "@mirohq/miro-api": "^2.0.0",
-    "mirotone": "5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "cookie": "^0.5.0",
     "dotenv": "^16.0.3",
-    "cookie": "^0.5.0"
+    "mirotone": "5",
+    "next": "14.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.1",
+    "typescript": "5.8.3"
+  }
 }
