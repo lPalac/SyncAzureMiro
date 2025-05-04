@@ -8,7 +8,7 @@ export default function handler(req, res) {
   if (req.query.code) {
     let url = `https://api.miro.com/v1/oauth/token?grant_type=authorization_code&client_id=${process.env.clientID}&client_secret=${process.env.clientSecret}&code=${req.query.code}&redirect_uri=${process.env.redirectURL}`;
 
-    async local function grabToken() {
+    async function grabToken() {
       try {
         let oauthResponse = await axios.post(url);
 
