@@ -49,6 +49,11 @@ export default async function Page() {
               <li key={board.name}>{board.name}</li>
             ))}
           </ul>
+
+          <p>Import</p>
+          <a className="button button-primary" href="" target="_blank">
+            Import from Azure DevOps
+          </a>
         </>
       )}
     </div>

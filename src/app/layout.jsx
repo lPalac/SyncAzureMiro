@@ -24,6 +24,10 @@ export default function RootLayout({ children }) {
             <div className="cs1 ce12">
               <SDKCreateSticyNote />
             </div>
+            <div className="cs1 ce12">
+              <p>this is all PBIs in sync azure</p>
+            </div>
+
             <hr className="cs1 ce12" />
             <div className="cs1 ce12">{children}</div>
             <hr className="cs1 ce12" />
