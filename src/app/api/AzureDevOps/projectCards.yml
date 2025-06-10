@@ -1,15 +1,60 @@
-name: Project Cards
-on:
-  project_card:
-    types: [created, deleted, edited, moved]
+trigger: none
+pr: none
+
+resources:
+  webhooks:
+    - webhook: BoardItemHook # alias you’ll reference in steps
+      connection: AzureBoards-Webhook # must match your service connection name
+
 jobs:
-  project_card_updated:
-    runs-on: ubuntu-latest
-    name: Project Card Updated
+  - job: SyncToMiro
+    displayName: "Create/Update Miro App Card"
+    pool:
+      vmImage: ubuntu-latest
+
     steps:
-      - name: Update Project Cards
-        uses: fjogeleit/http-request-action@v1.9.1
-        with:
-          url: "https://miro-github.netlify.app/.netlify/functions/project-cards"
-          method: "POST"
-          data: '{"gitHubProjectCard": ${{ toJSON(github.event.project_card) }}}'
+      - task: Bash@3
+        name: callMiro
+        displayName: "Parse WI and call Miro API"
+        inputs:
+          targetType: "inline"
+          script: |
+            set -e
+
+            # Raw JSON from the Boards webhook:
+            RAW='$(resources.webhooks.BoardItemHook.requestBody)'
+
+            # Only handle Product Backlog Items
+            WI_TYPE=$(echo "$RAW" | jq -r '.resource.fields["System.WorkItemType"]')
+            if [[ "$WI_TYPE" != "Product Backlog Item" ]]; then
+              echo "Not a PBI (got $WI_TYPE), skipping."
+              exit 0
+            fi
+
+            # Extract fields
+            WI_ID=$(echo "$RAW" | jq -r '.resource.workItemId')
+            TITLE=$(echo "$RAW" | jq -r '.resource.fields["System.Title"]' | jq -sR .)
+            DESC=$(echo "$RAW" | jq -r '.resource.fields["System.Description"]' | jq -sR .)
+
+            # Build Miro card payload per https://developers.miro.com/reference/create-app-card-item
+            read -r -d '' BODY <<EOF
+            {
+              "data": {
+                "title": $TITLE,
+                "description": $DESC,
+                "metadata": {
+                  "azureWorkItemId": "$WI_ID"
+                }
+              }
+            }
+            EOF
+
+            # Call Miro API
+            curl -X POST "https://api.miro.com/v2/cards" \
+              -H "Authorization: Bearer $MiroToken" \
+              -H "Content-Type: application/json" \
+              -d "$BODY"
+
+        env:
+          # Store your Miro personal-access-token as a secret pipeline variable
+          MiroToken: $(MiroToken)
