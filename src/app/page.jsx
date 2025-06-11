@@ -1,7 +1,6 @@
 import React from "react";
-
 import initMiroAPI from "../utils/initMiroAPI";
-import "../assets/style.css";
+import { redirect } from "next/dist/server/api-utils";
 
 const getBoards = async () => {
   const { miro, userId } = initMiroAPI();
@@ -24,18 +23,59 @@ const getBoards = async () => {
     boards,
   };
 };
+const getPBIs = async () => {
+  const PBIsID = [8230, 8236];
+
+  const response = await fetch(
+    `https://dev.azure.com/lilcodelab/7interactive-DiVerso/_apis/wit/workitems?ids=${PBIsID.join(
+      ","
+    )}&api-version=7.1`,
+    {
+      headers: {
+        Authorization: `Basic ${process.env.AZURE_ACCESS_TOKEN}`,
+      },
+    }
+  ).then((res) => res.json());
+  //console.log("response ", response);
+  //console.log("response ", response.value[0].fields["System.Title"]);
+  //console.log("response ", response.value[0].fields["System.State"]);
+  //console.log("response ", response.value[0].fields["system.assignedTo"]);
+  //console.log("authUrl ", authUrl);
+
+  return response.value.map((item) => ({
+    id: item.id,
+    title: item.fields["System.Title"],
+    state: item.fields["System.State"],
+    description: item.fields["System.Description"],
+    assignedTo: item.fields["System.AssignedTo"]?.displayName || "Unassigned",
+  }));
+};
 
 export default async function Page() {
+  const PBIs = await getPBIs();
   const { boards, authUrl } = await getBoards();
-
+  console.log("PBIs ", PBIs);
   return (
     <div>
-      <h3>API usage demo</h3>
+      <a className="button button-primary" href={""}>
+        get PBIs
+      </a>
+      <div>
+        {PBIs.map((pbi) => (
+          <div key={pbi.id}>
+            <h3>Title:{pbi.title}</h3>
+            <p>
+              <strong>State:</strong> {pbi.state}
+            </p>
+            <p>
+              <strong>Assigned To:</strong> {pbi.assignedTo}
+            </p>
+            <div dangerouslySetInnerHTML={{ __html: pbi.description }}></div>
+          </div>
+        ))}
+      </div>
       <p className="p-small">API Calls need to be authenticated</p>
-      <p>
-        Apps that use the API usually would run on your own domain. During
-        development, test on http://localhost:3000
-      </p>
+
       {authUrl ? (
         <a className="button button-primary" href={authUrl} target="_blank">
           Login
@@ -49,11 +89,6 @@ export default async function Page() {
               <li key={board.name}>{board.name}</li>
             ))}
           </ul>
-
-          <p>Import</p>
-          <a className="button button-primary" href="" target="_blank">
-            Import from Azure DevOps
-          </a>
         </>
       )}
     </div>

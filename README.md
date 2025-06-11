@@ -1,33 +1,67 @@
-## Overview  
-A Next.js app that syncs Azure DevOps PBIs with Miro boards using OAuth2 for authentication and the Miro SDK/REST API alongside Azure DevOps REST calls citeturn0search1turn0search2.
+## Overview
 
-## Setup  
-1. **Clone & install**  
+A Next.js app that syncs Azure DevOps PBIs with Miro boards using OAuth2 for authentication and the Miro SDK/REST API alongside Azure DevOps REST calls.
+
+## Setup
+
+1. **Clone & install**
+
    ```bash
    git clone https://github.com/your‑org/sync-azure-pbis.git
    cd sync-azure-pbis
    npm install
-   ```  
-2. **Environment**  
-   Create a `.env.local` in the project root with:  
-   ```env
-   MIRO_CLIENT_ID=your_miro_client_id
-   MIRO_CLIENT_SECRET=your_miro_client_secret
-   MIRO_REDIRECT_URI=http://localhost:3000/api/redirect
+   ```
 
+2. **Configure your Miro App**
+
+   - Go to [Miro Developer Console](https://developers.miro.com/)
+   - Create or select your app
+   - In OAuth settings, set Redirect URI to: `http://localhost:3000/api/auth/miro/callback`
+   - Copy your Client ID and Client Secret
+
+3. **Environment Setup**  
+   Create a `.env.local` in the project root with:
+
+   ```env
+   # Miro API Configuration
+   MIRO_CLIENT_ID=your_miro_client_id_here
+   MIRO_CLIENT_SECRET=your_miro_client_secret_here
+   MIRO_REDIRECT_URI=http://localhost:3000/api/auth/miro/callback
+
+   # Azure DevOps Configuration (Optional - for future features)
    AZURE_DEVOPS_ORG=https://dev.azure.com/your-org
    AZURE_DEVOPS_PAT=your_personal_access_token
-   ```  
-   Next.js auto‑loads `.env.local` into `process.env` for server and client (when prefixed with `NEXT_PUBLIC_`) citeturn0search0turn0search3.
 
-## Usage  
-- **Dev server:** `npm run dev` (defaults to `http://localhost:3000`)  
-- **Login:** Click **Login** in the Miro panel to open the OAuth popup; on success it auto‑reloads via `postMessage` citeturn0search1.  
-- **Features:**  
-  - List your Miro boards  
-  - Create sticky notes via SDK  
-  - Receive Azure DevOps webhooks to update Miro  
-  - Listen for board changes and push updates back to Azure DevOps  
+   # Environment
+   NODE_ENV=development
+   ```
 
-## License  
+## Usage
+
+- **Dev server:** `npm run dev` (defaults to `http://localhost:3000`)
+- **Authentication:** Click **Connect to Miro** to start OAuth flow
+- **Features:**
+  - OAuth2 authentication with Miro
+  - List your Miro boards with details
+  - Secure session management
+  - Future: Azure DevOps integration
+
+## Authentication Flow
+
+1. Click "Connect to Miro" button
+2. Redirected to Miro OAuth authorization
+3. Grant permissions to your app
+4. Redirected back to localhost with auth code
+5. App exchanges code for access tokens
+6. View your Miro boards!
+
+## Production Deployment
+
+For production deployment, update your Miro app settings:
+
+- Add production redirect URI: `https://your-domain.com/api/auth/miro/callback`
+- Update your `.env.production` with the production redirect URI
+
+## License
+
 Luka Palac

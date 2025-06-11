@@ -1,0 +1,54 @@
+name: Deploy Azure DevOps Service Hooks
+
+on:
+  push:
+    branches: [feature/helpers]
+
+permissions:
+  contents: read
+
+jobs:
+  provision-hooks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Azure CLI
+        uses: azure/cli@v1
+
+      - name: Create “PBI Created” Hook
+        run: |
+          az devops service-hook subscription create \
+            --organization https://dev.azure.com/lilcodelab \
+            --project 7interactive-DiVerso \
+            --publisher-id tfs \
+            --event-type workitem.created \
+            --resource-version 1.0 \
+            --publisher-inputs workItemType=Product\ Backlog\ Item \
+            --consumer-id webHooks \
+            --consumer-action-id httpRequest \
+            --consumer-inputs url=https://syncazurepbis.netlify.app/.netlify/functions/issues
+
+      - name: Create “PBI Updated (Title/Description)” Hook
+        run: |
+          az devops service-hook subscription create \
+            --organization https://dev.azure.com/lilcodelab \
+            --project 7interactive-DiVerso \
+            --publisher-id tfs \
+            --event-type workitem.updated \
+            --resource-version 1.0 \
+            --publisher-inputs workItemType=Product\ Backlog\ Item,fields=System.Title,System.Description \
+            --consumer-id webHooks \
+            --consumer-action-id httpRequest \
+            --consumer-inputs url=https://syncazurepbis.netlify.app/.netlify/functions/issues
+
+      - name: Create “PBI Updated (State)” Hook
+        run: |
+          az devops service-hook subscription create \
+            --organization https://dev.azure.com/lilcodelab \
+            --project 7interactive-DiVerso\
+            --publisher-id tfs \
+            --event-type workitem.updated \
+            --resource-version 1.0 \
+            --publisher-inputs workItemType=Product\ Backlog\ Item,fields=System.State \
+            --consumer-id webHooks \
+            --consumer-action-id httpRequest \
+            --consumer-inputs url=https://syncazurepbis.netlify.app/.netlify/functions/project-cards

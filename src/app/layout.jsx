@@ -5,15 +5,23 @@ import Script from "next/script";
 import SyncAzureLogo from "../assets/SyncAzureLogo.png";
 import { SDKCreateSticyNote } from "../components/SDKUsageDemo";
 import { MiroSDKInit } from "../components/SDKInit";
+import "./globals.css";
+
+export const metadata = {
+  title: "Sync Azure PBIs",
+  description: "Sync Azure DevOps Product Backlog Items with Miro",
+};
 
 export default function RootLayout({ children }) {
   return (
-    <html>
-      <body>
+    <html lang="en">
+      <head>
         <Script
           src="https://miro.com/app/static/sdk/v2/miro.js"
           strategy="beforeInteractive"
         />
+      </head>
+      <body>
         <MiroSDKInit />
         <div id="root">
           <div className="grid">
